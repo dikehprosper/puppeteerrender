@@ -33,7 +33,7 @@ app.get("/", async (req, res) => {
             '--single-process',
             '--no-zygote'
         ],
-         ececutablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        ececutablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
 
     });
 
@@ -43,16 +43,16 @@ app.get("/", async (req, res) => {
         await page.goto("https://logigames.bet9ja.com/Games/Launcher?gameId=11000&provider=0&pff=1&skin=201");
 
         const html1 = await page.evaluate(() =>
-            Array.from(document.querySelectorAll('.balls > span'), (e) => e.textContent)
+            Array.from(document.querySelectorAll('.balls span'), (e) => e.innerText)
         );
 
-        // const html2 = await page.evaluate(() =>
-        //     Array.from(document.querySelectorAll('.statistics > tbody > tr > td'), (e) => e.textContent)
-        // );
+        const html2 = await page.evaluate(() =>
+            Array.from(document.querySelectorAll('.statistics > tbody > tr > td'), (e) => e.textContent)
+        );
 
         const data = {
             balls: html1,
-            // statistics: html2
+            statistics: html2
         };
         res.status(200).json(data);
     } catch (e) {
