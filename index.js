@@ -25,12 +25,7 @@ app.get("/", async (req, res) => {
     // }
 
 
-    const browser = await puppeteer.launch({
-        args: [
-            '--no-sandbox',
-            '--disabe-setuid-sandbox',
-        ]
-    });
+    const browser = await puppeteer.launch();
 
     try {
         const page = await browser.newPage();
