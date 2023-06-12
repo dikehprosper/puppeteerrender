@@ -46,13 +46,13 @@ app.get("/", async (req, res) => {
             Array.from(document.querySelectorAll('.balls > span'), (e) => e.textContent)
         );
 
-        const html2 = await page.evaluate(() =>
-            Array.from(document.querySelectorAll('.statistics > tbody > tr > td'), (e) => e.textContent)
-        );
+        // const html2 = await page.evaluate(() =>
+        //     Array.from(document.querySelectorAll('.statistics > tbody > tr > td'), (e) => e.textContent)
+        // );
 
         const data = {
             balls: html1,
-            statistics: html2
+            // statistics: html2
         };
         res.status(200).json(data);
     } catch (e) {
