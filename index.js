@@ -33,7 +33,7 @@ app.get("/", async (req, res) => {
             '--single-process',
             '--no-zygote'
         ],
-         ececutablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
+         ececutablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
 
     });
 
