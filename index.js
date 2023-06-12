@@ -43,7 +43,7 @@ app.get("/", async (req, res) => {
         await page.goto("https://logigames.bet9ja.com/Games/Launcher?gameId=11000&provider=0&pff=1&skin=201");
 
         const html1 = await page.evaluate(() =>
-            Array.from(document.querySelectorAll('.balls span'), (e) => e.textContent)
+            Array.from(document.querySelectorAll('.balls > span'), (e) => e.textContent)
         );
 
         const html2 = await page.evaluate(() =>
