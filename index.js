@@ -59,7 +59,7 @@ async function scrapeAndStoreData() {
 
             await page.goto("https://logigames.bet9ja.com/Games/Launcher?gameId=11000&provider=0&pff=1&skin=201");
 
-            const html1 = await page.evaluate(() =>
+            const html3 = await page.evaluate(() =>
                 Array.from(document.querySelectorAll('.statistics > tbody > tr > td'), (e) => e.textContent)
             );
 
@@ -68,7 +68,7 @@ async function scrapeAndStoreData() {
             );
 
             const data = {
-                balls: html1,
+                balls: html3,
                 statistics: html2
             };
             const jsonData = JSON.stringify(data);
