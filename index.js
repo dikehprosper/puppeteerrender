@@ -36,7 +36,7 @@ function restartCountdown() {
 startCountdown();
 
 const intervalInMilliseconds = 1000; // 7 seconds
-let previousData = fs.readFileSync("scraped-data.json", "utf8"); // Read the current data from scraped-data.json
+// Read the current data from scraped-data.json
 
 
 async function scrapeAndStoreData() {
@@ -72,13 +72,14 @@ async function scrapeAndStoreData() {
             const jsonData = JSON.stringify(data);
 
             // Check if the newly scraped data is different from the previous data
-            if (jsonData !== previousData) {
+        
+            if (jsonData) {
                 fs.writeFile("scraped-data.json", jsonData, (err) => {
                     if (err) {
                         console.error("An error occurred while writing the file:", err);
                     } else {
                         console.log("Data scraped and stored successfully!");
-                        previousData = jsonData; // Update the previousData variable with the new data
+                        // Update the previousData variable with the new data
                     }
                 });
             } else {
@@ -99,7 +100,7 @@ scrapeAndStoreData();
 setInterval(scrapeAndStoreData, intervalInMilliseconds);
 
 
-app.get("/", (req, res) => {
+app.get("/FETCH-DATA", (req, res) => {
     fs.readFile("scraped-data.json", (err, data) => {
         if (err) {
             console.error("An error occurred while reading the file:", err);
