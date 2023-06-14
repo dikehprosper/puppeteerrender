@@ -72,7 +72,7 @@ async function scrapeAndStoreData() {
             const jsonData = JSON.stringify(data);
 
             // Check if the newly scraped data is different from the previous data
-        
+
             if (jsonData) {
                 fs.writeFile("scraped-data.json", jsonData, (err) => {
                     if (err) {
@@ -100,7 +100,7 @@ scrapeAndStoreData();
 setInterval(scrapeAndStoreData, intervalInMilliseconds);
 
 
-app.get("/FETCH-DATA", (req, res) => {
+app.get("/", (req, res) => {
     fs.readFile("scraped-data.json", (err, data) => {
         if (err) {
             console.error("An error occurred while reading the file:", err);
