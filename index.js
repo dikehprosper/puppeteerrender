@@ -54,6 +54,7 @@ app.get("/", async (req, res) => {
             balls: html1,
             statistics: html2
         };
+        console.log(data)
         res.status(200).json(data);
     } catch (e) {
         console.error(e)
