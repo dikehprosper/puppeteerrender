@@ -169,7 +169,7 @@ app.get("/", (req, res) => {
         }
     });
 });
-app.get("/fetch", (req, res) => {
+app.get("/", (req, res) => {
     fs.readFile("scraped-data.json1", (err, data) => {
         if (err) {
             console.error("An error occurred while reading the file:", err);
