@@ -97,7 +97,7 @@ async function scrapeAndStoreData() {
 
 
 async function scrapeAndStoreData1() {
-    if (count === 6) {
+    if (count === 1) {
         try {
 
             const browser = await puppeteer.launch({
