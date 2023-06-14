@@ -67,7 +67,7 @@ app.get("/", async (req, res) => {
 
 
 
-const FIVE_MINUTES = 0.1 * 60 * 1000; // 5 minutes in milliseconds
+const FIVE_MINUTES = 0.5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Function to run the request at the specified interval
 const runRequest = async () => {
