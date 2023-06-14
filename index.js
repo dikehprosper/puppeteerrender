@@ -67,6 +67,62 @@ app.get("/", async (req, res) => {
 
 
 
+const FIVE_MINUTES = 0.1 * 60 * 1000; // 5 minutes in milliseconds
+
+// Function to run the request at the specified interval
+const runRequest = async () => {
+    try {
+        const browser = await puppeteer.launch({
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--single-process",
+                "--no-zygote",
+            ],
+            executablePath:
+                process.env.NODE_ENV === "production"
+                    ? process.env.PUPPETEER_EXECUTABLE_PATH
+                    : puppeteer.executablePath(),
+        });
+
+        const page = await browser.newPage();
+        await page.goto(
+            "https://logigames.bet9ja.com/Games/Launcher?gameId=11000&provider=0&pff=1&skin=201"
+        );
+
+        const html1 = await page.evaluate(() =>
+            Array.from(
+                document.querySelectorAll(".statistics > tbody >  tr > td > .balls > span"),
+                (e) => e.innerText
+            )
+        );
+
+        const html2 = await page.evaluate(() =>
+            Array.from(
+                document.querySelectorAll(".statistics > tbody > tr > td"),
+                (e) => e.textContent
+            )
+        );
+
+        const data = {
+            balls: html1,
+            statistics: html2,
+        };
+        console.log(data);
+        // Do something with the data (e.g., store it in a database, send it to frontend, etc.)
+
+        await browser.close();
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+// Run the request initially when the server starts
+runRequest();
+
+// Schedule the recurring request every 5 minutes
+setInterval(runRequest, FIVE_MINUTES);
+
 
 
 app.listen(PORT, () => {
