@@ -4,125 +4,112 @@ const express = require("express")
 const app = express();
 const PORT = process.env.PORT || 4000;
 require("dotenv").config();
-// app.use(cors());
-// if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-//     chrome = require("chrome-aws-lambda");
-//     puppeteer = require("puppeteer-core");
-// }
+const fs = require("fs");
 
 
-app.get("/", async (req, res) => {
 
-    // let options = {};
+// Countdown section
+let count = 49;
+let activeButton = 0;
+let interval;
 
-    // if (process.env_AWS_LAMBDA_FUNCTION_VERSION) {
-    //     options = {
-    //         args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-    //         defaultViewport: chrome.defaultViewport,
-    //         executablePath: await chrome.executablePath,
-    //         headless: true,
-    //         ignoreHTTPSErrors: true,
-    //     };
-    // }
+function startCountdown() {
+    interval = setInterval(() => {
+        console.log(count);
+        if (count > 0) {
+            count--;
+            activeButton++;
+        } else {
+            clearInterval(interval);
+            restartCountdown();
+        }
+    }, 1000);
+}
+
+function restartCountdown() {
+    count = 49;
+    activeButton = 4;
+    startCountdown(); // Start the countdown again
+}
+
+// Start the countdown when the server starts
+startCountdown();
+
+const intervalInMilliseconds = 1000; // 7 seconds
+let previousData = fs.readFileSync("scraped-data.json", "utf8"); // Read the current data from scraped-data.json
 
 
-    const browser = await puppeteer.launch({
-        args: [
-            '--no-sandbox',
-            '--disabe-setuid-sandbox',
-            '--single-process',
-            '--no-zygote'
-        ],
-        ececutablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+async function scrapeAndStoreData() {
+    if (count === 6) {
+        try {
 
+            const browser = await puppeteer.launch({
+                args: [
+                    '--no-sandbox',
+                    '--disabe-setuid-sandbox',
+                    '--single-process',
+                    '--no-zygote'
+                ],
+                executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+
+            });
+            const page = await browser.newPage();
+
+            await page.goto("https://logigames.bet9ja.com/Games/Launcher?gameId=11000&provider=0&pff=1&skin=201");
+
+            const html1 = await page.evaluate(() =>
+                Array.from(document.querySelectorAll('.statistics > tbody >  tr > td > .balls > span'), (e) => e.innerText)
+            );
+
+            const html2 = await page.evaluate(() =>
+                Array.from(document.querySelectorAll('.statistics > tbody > tr > td'), (e) => e.textContent)
+            );
+
+            const data = {
+                balls: html1,
+                statistics: html2
+            };
+            const jsonData = JSON.stringify(data);
+
+            // Check if the newly scraped data is different from the previous data
+            if (jsonData !== previousData) {
+                fs.writeFile("scraped-data.json", jsonData, (err) => {
+                    if (err) {
+                        console.error("An error occurred while writing the file:", err);
+                    } else {
+                        console.log("Data scraped and stored successfully!");
+                        previousData = jsonData; // Update the previousData variable with the new data
+                    }
+                });
+            } else {
+                console.log("Data is the same!");
+            }
+        } catch (e) {
+            console.error(e)
+            res.send(`something went wrong while running Puppeteer: ${e}`)
+        }
+    }
+}
+
+
+// Run the scraping and storing process initially
+scrapeAndStoreData();
+
+// Schedule the scraping and storing process to run every 7 seconds
+setInterval(scrapeAndStoreData, intervalInMilliseconds);
+
+
+app.get("/", (req, res) => {
+    fs.readFile("scraped-data.json", (err, data) => {
+        if (err) {
+            console.error("An error occurred while reading the file:", err);
+            res.status(500).send("An error occurred while fetching the data.");
+        } else {
+            const jsonData = JSON.parse(data);
+            res.status(200).json(jsonData);
+        }
     });
-
-    try {
-        const page = await browser.newPage();
-
-        await page.goto("https://logigames.bet9ja.com/Games/Launcher?gameId=11000&provider=0&pff=1&skin=201");
-
-        const html1 = await page.evaluate(() =>
-            Array.from(document.querySelectorAll('.statistics > tbody >  tr > td > .balls > span'), (e) => e.innerText)
-        );
-
-        const html2 = await page.evaluate(() =>
-            Array.from(document.querySelectorAll('.statistics > tbody > tr > td'), (e) => e.textContent)
-        );
-
-        const data = {
-            balls: html1,
-            statistics: html2
-        };
-        console.log(data)
-        res.status(200).json(data);
-    } catch (e) {
-        console.error(e)
-        res.send(`something went wrong while running Puppeteer: ${e}`)
-    } finally {
-        await browser.close();
-    }
-
-})
-
-
-
-const FIVE_MINUTES = 0.5 * 60 * 1000; // 5 minutes in milliseconds
-
-// Function to run the request at the specified interval
-const runRequest = async () => {
-    try {
-        const browser = await puppeteer.launch({
-            args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--single-process",
-                "--no-zygote",
-            ],
-            executablePath:
-                process.env.NODE_ENV === "production"
-                    ? process.env.PUPPETEER_EXECUTABLE_PATH
-                    : puppeteer.executablePath(),
-        });
-
-        const page = await browser.newPage();
-        await page.goto(
-            "https://logigames.bet9ja.com/Games/Launcher?gameId=11000&provider=0&pff=1&skin=201"
-        );
-
-        const html1 = await page.evaluate(() =>
-            Array.from(
-                document.querySelectorAll(".statistics > tbody >  tr > td > .balls > span"),
-                (e) => e.innerText
-            )
-        );
-
-        const html2 = await page.evaluate(() =>
-            Array.from(
-                document.querySelectorAll(".statistics > tbody > tr > td"),
-                (e) => e.textContent
-            )
-        );
-
-        const data = {
-            balls: html1,
-            statistics: html2,
-        };
-        console.log(data);
-        // Do something with the data (e.g., store it in a database, send it to frontend, etc.)
-
-        await browser.close();
-    } catch (e) {
-        console.error(e);
-    }
-};
-
-// Run the request initially when the server starts
-runRequest();
-
-// Schedule the recurring request every 5 minutes
-setInterval(runRequest, FIVE_MINUTES);
-
+});
 
 
 app.listen(PORT, () => {
@@ -130,3 +117,6 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+
+
